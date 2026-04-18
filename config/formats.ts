@@ -169,15 +169,6 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		section: "S/V Doubles",
 	},
 	{
-		name: "PDL Season 2",
-		mod: 'gen9',
-		gameType: 'doubles',
-		searchShow: false,
-		bestOfDefault: true,
-		ruleset: ['Flat Rules'],
-		restricted: ['Restricted Legendary'],
-	},
-	{
 		name: "[Gen 9] Random Doubles Battle",
 		mod: 'gen9',
 		gameType: 'doubles',
