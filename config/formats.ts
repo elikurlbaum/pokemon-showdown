@@ -282,6 +282,31 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		// no restrictions, for serious (other than team preview)
 		ruleset: ['Team Preview', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100'],
 	},
+	{
+		name: "[Gen 9] PDL Season 1",
+		mod: 'gen9',
+		gameType: 'doubles',
+		effectType: "Format",
+		desc: "Testing to see if I can host a custom draft league with unique rules!",
+		ruleset: ['Flat Rules', '+past'],
+		banlist: [],
+		challengeShow: true,
+		searchShow: true,
+		tournamentShow: true
+	},
+	{
+		name: "[Gen 9] PDL Season 2",
+		mod: 'gen9',
+		gameType: 'doubles',
+		effectType: "Format",
+		desc: "Updated for PDL S2!",
+		ruleset: ['Flat Rules', '+past', '+Mawile', '+future'],
+		banlist: [],
+		unbanlist: [],
+		challengeShow: true,
+		searchShow: true,
+		tournamentShow: true
+	},
 
 	// S/V Doubles
 	///////////////////////////////////////////////////////////////////
