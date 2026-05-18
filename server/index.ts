@@ -168,7 +168,7 @@ export const readyPromise = cleanupStale().then(() => {
 			// TODO:
 			// - Compatibility with https://nodejs.org/api/cli.html#cli_unhandled_rejections_mode
 			// - Crashlogger API for reporting rejections vs exceptions
-			Monitor.crashlog(err as any, 'A main process Promise');
+			// Monitor.crashlog(err as any, 'A main process Promise');
 		});
 	}
 
