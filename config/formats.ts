@@ -43,7 +43,7 @@ export const Formats: import("../sim/dex-formats").FormatList = [
 		challengeShow: true,
 		searchShow: true,
 		tournamentShow: true,
-		bestOfDefault: true,
+		bestOfDefault: false,
 	},
 	{
 		name: "[Gen 9] PDL Season 1",
@@ -56,6 +56,6 @@ export const Formats: import("../sim/dex-formats").FormatList = [
 		challengeShow: true,
 		searchShow: true,
 		tournamentShow: true,
-		bestOfDefault: true,
+		bestOfDefault: false,
 	},
 ];
