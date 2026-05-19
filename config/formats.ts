@@ -25,7 +25,7 @@ export const Formats: import("../sim/dex-formats").FormatList = [
 		section: "Pokemon Draft League",
 	},
 	{
-		name: "PDL Season 2",
+		name: "[Gen 9] PDL Season 2",
 		mod: "gen9",
 		gameType: "doubles",
 		effectType: "Format",
@@ -44,7 +44,7 @@ export const Formats: import("../sim/dex-formats").FormatList = [
 		tournamentShow: true,
 	},
 	{
-		name: "PDL Season 2 (Bo3)",
+		name: "[Gen 9] PDL Season 2 (Best of 3)",
 		mod: "gen9",
 		gameType: "doubles",
 		effectType: "Format",
