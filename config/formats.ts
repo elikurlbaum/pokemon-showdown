@@ -44,7 +44,7 @@ export const Formats: import("../sim/dex-formats").FormatList = [
 		tournamentShow: true,
 	},
 	{
-		name: "[Gen 9] PDL Season 2 (Best of 3)",
+		name: "[Gen 9] PDL Season 2 (Bo3)",
 		mod: "gen9",
 		gameType: "doubles",
 		effectType: "Format",
