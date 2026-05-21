@@ -1,18 +1,34 @@
 'use strict';
 
 /**
+ * replaysdb - PostgreSQL connection string for storing replays locally.
+ *   Can point to a local Postgres instance or a remote one (e.g. Supabase).
+ *   Format: 'postgresql://user:password@host:port/database'
+ *   If not set, replays are uploaded through the login server instead.
+ * @type {string | undefined}
+ */
+exports.replaysdb = `postgresql://postgres:${process.env.REPLAYS_DB_PASSWORD}@db.ypjfyyfzmxszclnvipnn.supabase.co:5432/postgres`;
+
+/**
+ * autosavereplays - automatically save all battle replays
+ *   Set to true to save all replays publicly, or 'private' to save them privately.
+ * @type {boolean|string}
+ */
+exports.autosavereplays = true;
+
+/**
  * The server port - the port to run Pokemon Showdown under
  *
  * @type {number}
  */
-exports.port = process.env.PORT || 8000,
+exports.port = process.env.PORT || 8000;
 
 /**
- * The server address - the address at which Pokemon Showdown should be hosting
- *   This should be kept set to 0.0.0.0 unless you know what you're doing.
- *
- * @type {string}
- */
+	 * The server address - the address at which Pokemon Showdown should be hosting
+	 *   This should be kept set to 0.0.0.0 unless you know what you're doing.
+	 *
+	 * @type {string}
+	 */
 exports.bindaddress = '0.0.0.0';
 
 /**
