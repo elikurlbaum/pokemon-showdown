@@ -1,13 +1,19 @@
-'use strict';
+"use strict";
 
 /**
- * replaysdb - PostgreSQL connection string for storing replays locally.
+ * replaysdb - PostgreSQL config object for storing replays locally.
  *   Can point to a local Postgres instance or a remote one (e.g. Supabase).
- *   Format: 'postgresql://user:password@host:port/database'
  *   If not set, replays are uploaded through the login server instead.
- * @type {string | undefined}
+ * @type {import('pg').PoolConfig | undefined}
  */
-exports.replaysdb = `postgresql://postgres:${process.env.REPLAYS_DB_PASSWORD}@db.ypjfyyfzmxszclnvipnn.supabase.co:5432/postgres`;
+exports.replaysdb = {
+	host: "db.ypjfyyfzmxszclnvipnn.supabase.co",
+	port: 5432,
+	database: "postgres",
+	user: "postgres",
+	password: process.env.REPLAYS_DB_PASSWORD,
+	ssl: { rejectUnauthorized: false },
+};
 
 /**
  * autosavereplays - automatically save all battle replays
@@ -24,12 +30,12 @@ exports.autosavereplays = true;
 exports.port = process.env.PORT || 8000;
 
 /**
-	 * The server address - the address at which Pokemon Showdown should be hosting
-	 *   This should be kept set to 0.0.0.0 unless you know what you're doing.
-	 *
-	 * @type {string}
-	 */
-exports.bindaddress = '0.0.0.0';
+ * The server address - the address at which Pokemon Showdown should be hosting
+ *   This should be kept set to 0.0.0.0 unless you know what you're doing.
+ *
+ * @type {string}
+ */
+exports.bindaddress = "0.0.0.0";
 
 /**
  * wsdeflate - compresses WebSocket messages
@@ -188,7 +194,7 @@ exports.debugdexsearchprocesses = true;
  *
  * @type {ID}
  */
-exports.potd = '';
+exports.potd = "";
 
 /**
  * crash guard - write errors to log file instead of crashing
@@ -204,7 +210,7 @@ exports.crashguard = true;
  *   This is the URL of the user database and ladder mentioned earlier.
  *   Don't change this setting - there aren't any other login servers right now
  */
-exports.loginserver = 'http://play.pokemonshowdown.com/';
+exports.loginserver = "http://play.pokemonshowdown.com/";
 exports.loginserverkeyalgo = "RSA-SHA1";
 exports.loginserverpublickeyid = 4;
 exports.loginserverpublickey = `-----BEGIN PUBLIC KEY-----
@@ -228,10 +234,10 @@ Y929lRybWEiKUr+4Yw2O1W0CAwEAAQ==
  *   Don't change this setting - there aren't any other options right now
  */
 exports.routes = {
-	root: 'pokemonshowdown.com',
-	client: 'play.pokemonshowdown.com',
-	dex: 'dex.pokemonshowdown.com',
-	replays: 'replay.pokemonshowdown.com',
+	root: "pokemonshowdown.com",
+	client: "play.pokemonshowdown.com",
+	dex: "dex.pokemonshowdown.com",
+	replays: "replay.pokemonshowdown.com",
 };
 
 /**
@@ -427,7 +433,7 @@ exports.backdoor = true;
  * the `console` permission in order to use the dev console.
  * Setting this to an empty array ([]) will disable the dev console.
  */
-exports.consoleips = ['127.0.0.1'];
+exports.consoleips = ["127.0.0.1"];
 
 /**
  * Whether to watch the config file for changes. If this is enabled,
@@ -485,9 +491,11 @@ exports.noguestsecurity = false;
  * tourdefaultplayercap - a set cap of how many players can be in a tournament
  * ratedtours - toggles tournaments being ladder rated (true) or not (false)
  */
-exports.tourroom = '';
+exports.tourroom = "";
 /** @type {string[]} */
-exports.tourannouncements = [/* roomids */];
+exports.tourannouncements = [
+	/* roomids */
+];
 exports.tourdefaultplayercap = 0;
 exports.ratedtours = false;
 
@@ -496,7 +504,7 @@ exports.ratedtours = false;
  * disciplinary actions on your section. You can also leave this blank, in
  * which case users won't be given any information on how to appeal.
  */
-exports.appealurl = '';
+exports.appealurl = "";
 
 /**
  * repl - whether repl sockets are enabled or not
@@ -504,7 +512,7 @@ exports.appealurl = '';
  * replsocketmode - the file mode bits to use for the repl sockets
  */
 exports.repl = true;
-exports.replsocketprefix = './logs/repl/';
+exports.replsocketprefix = "./logs/repl/";
 exports.replsocketmode = 0o600;
 
 /**
@@ -534,13 +542,13 @@ exports.startuphook = function () {};
  * lastfmkey - the API key to let users use the last.fm commands from The Studio's
  * chat plugin.
  */
-exports.lastfmkey = '';
+exports.lastfmkey = "";
 
 /**
  * chatlogreader - the search method used for searching chatlogs.
  * @type {'ripgrep' | 'fs'}
  */
-exports.chatlogreader = 'fs';
+exports.chatlogreader = "fs";
 /**
  * permissions and groups:
  *   Each entry in `grouplist` is a separate group. Some of the members are "special"
@@ -598,17 +606,17 @@ exports.chatlogreader = 'fs';
  */
 exports.grouplist = [
 	{
-		symbol: '~',
+		symbol: "~",
 		id: "admin",
 		name: "Administrator",
-		inherit: '@',
-		jurisdiction: 'u',
+		inherit: "@",
+		jurisdiction: "u",
 		globalonly: true,
 
 		console: true,
 		bypassall: true,
 		lockdown: true,
-		promote: '~u',
+		promote: "~u",
 		roomowner: true,
 		roombot: true,
 		roommod: true,
@@ -628,11 +636,11 @@ exports.grouplist = [
 		tournaments: true,
 	},
 	{
-		symbol: '#',
+		symbol: "#",
 		id: "owner",
 		name: "Room Owner",
-		inherit: '@',
-		jurisdiction: 'u',
+		inherit: "@",
+		jurisdiction: "u",
 		roomonly: true,
 
 		roombot: true,
@@ -646,55 +654,55 @@ exports.grouplist = [
 		tournaments: true,
 	},
 	{
-		symbol: '\u2605',
+		symbol: "\u2605",
 		id: "host",
 		name: "Host",
-		inherit: '@',
-		jurisdiction: 'u',
+		inherit: "@",
+		jurisdiction: "u",
 		roomonly: true,
 
 		declare: true,
-		modchat: 'a',
+		modchat: "a",
 		gamemanagement: true,
 		forcewin: true,
 		tournaments: true,
 		joinbattle: true,
 	},
 	{
-		symbol: '@',
+		symbol: "@",
 		id: "mod",
 		name: "Moderator",
-		inherit: '%',
-		jurisdiction: 'u',
+		inherit: "%",
+		jurisdiction: "u",
 
 		globalban: true,
 		ban: true,
-		modchat: 'a',
+		modchat: "a",
 		roomvoice: true,
 		roomwhitelist: true,
 		forcerename: true,
 		ip: true,
-		alts: '@u',
+		alts: "@u",
 		game: true,
 	},
 	{
-		symbol: '%',
+		symbol: "%",
 		id: "driver",
 		name: "Driver",
-		inherit: '+',
-		jurisdiction: 'u',
-		globalGroupInPersonalRoom: '@',
+		inherit: "+",
+		jurisdiction: "u",
+		globalGroupInPersonalRoom: "@",
 
 		announce: true,
-		warn: '\u2605u',
+		warn: "\u2605u",
 		kick: true,
-		mute: '\u2605u',
+		mute: "\u2605u",
 		lock: true,
 		forcerename: true,
 		timer: true,
 		modlog: true,
-		alts: '%u',
-		bypassblocks: 'u%@~',
+		alts: "%u",
+		bypassblocks: "u%@~",
 		receiveauthmessages: true,
 		gamemoderation: true,
 		jeopardy: true,
@@ -708,11 +716,11 @@ exports.grouplist = [
 		// of modjoin % rooms (namely, Staff).
 		// (They were previously above Driver/Mod so they can have game management
 		// permissions drivers don't, but these permissions can be manually given.)
-		symbol: '*',
+		symbol: "*",
 		id: "bot",
 		name: "Bot",
-		inherit: '%',
-		jurisdiction: 'u',
+		inherit: "%",
+		jurisdiction: "u",
 
 		addhtml: true,
 		tournaments: true,
@@ -727,10 +735,10 @@ exports.grouplist = [
 		alts: false,
 	},
 	{
-		symbol: '\u2606',
+		symbol: "\u2606",
 		id: "player",
 		name: "Player",
-		inherit: '+',
+		inherit: "+",
 		battleonly: true,
 
 		roomvoice: true,
@@ -741,10 +749,10 @@ exports.grouplist = [
 		nooverride: true,
 	},
 	{
-		symbol: '+',
+		symbol: "+",
 		id: "voice",
 		name: "Voice",
-		inherit: ' ',
+		inherit: " ",
 
 		altsself: true,
 		makegroupchat: true,
@@ -755,16 +763,16 @@ exports.grouplist = [
 		importinputlog: true,
 	},
 	{
-		symbol: '^',
+		symbol: "^",
 		id: "prizewinner",
 		name: "Prize Winner",
 		roomonly: true,
 	},
 	{
-		symbol: 'whitelist',
+		symbol: "whitelist",
 		id: "whitelist",
 		name: "Whitelist",
-		inherit: ' ',
+		inherit: " ",
 		roomonly: true,
 		altsself: true,
 		show: true,
@@ -773,19 +781,19 @@ exports.grouplist = [
 		importinputlog: true,
 	},
 	{
-		symbol: ' ',
+		symbol: " ",
 		ipself: true,
 	},
 	{
-		name: 'Locked',
-		id: 'locked',
-		symbol: '\u203d',
-		punishgroup: 'LOCK',
+		name: "Locked",
+		id: "locked",
+		symbol: "\u203d",
+		punishgroup: "LOCK",
 	},
 	{
-		name: 'Muted',
-		id: 'muted',
-		symbol: '!',
-		punishgroup: 'MUTE',
+		name: "Muted",
+		id: "muted",
+		symbol: "!",
+		punishgroup: "MUTE",
 	},
 ];
