@@ -2081,7 +2081,9 @@ export class GameRoom extends BasicRoom {
 		// directly.
 
 		if (Replays.db) {
-			const idWithServer = Config.serverid === 'showdown' ? id : `${Config.serverid}-${id}`;
+			const uploadtime = Date.now();
+			const timestamp = uploadtime;
+			const idWithServer = Config.serverid === 'showdown' ? `${id}-${timestamp}` : `${Config.serverid}-${id}-${timestamp}`;
 			try {
 				const fullid = await Replays.add({
 					id: idWithServer,
@@ -2092,7 +2094,7 @@ export class GameRoom extends BasicRoom {
 					private: hidden,
 					password,
 					inputlog: battle.inputLog?.join('\n') || null,
-					uploadtime: Math.trunc(Date.now() / 1000),
+					uploadtime,
 				});
 				const url = `https://${Config.routes.replays}/${fullid}`;
 				connection?.popup(

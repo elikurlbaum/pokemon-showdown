@@ -23,6 +23,13 @@ exports.replaysdb = {
 exports.autosavereplays = true;
 
 /**
+ * serverid - a unique identifier for this server, used as a prefix in replay IDs.
+ *   Must not be 'showdown'. Use a short lowercase identifier, e.g. 'pdl'.
+ * @type {string}
+ */
+exports.serverid = "pdl";
+
+/**
  * The server port - the port to run Pokemon Showdown under
  *
  * @type {number}
