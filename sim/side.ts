@@ -763,6 +763,9 @@ export class Side {
 		if ((mega || megax || megay) && this.choice.mega && !mixandmega) {
 			return this.emitChoiceError(`Can't move: You can only mega-evolve once per battle`);
 		}
+		if ((mega || megax || megay) && this.choice.terastallize) {
+			return this.emitChoiceError(`Can't move: You can't Mega Evolve and Terastallize in the same turn`);
+		}
 		const ultra = (event === 'ultra');
 		if (ultra && !pokemon.canUltraBurst) {
 			return this.emitChoiceError(`Can't move: ${pokemon.name} can't ultra burst`);
@@ -793,6 +796,9 @@ export class Side {
 		}
 		if (terastallize && this.choice.terastallize) {
 			return this.emitChoiceError(`Can't move: You can only Terastallize once per battle.`);
+		}
+		if (terastallize && (this.choice.mega || this.choice.ultra)) {
+			return this.emitChoiceError(`Can't move: You can't Terastallize and Mega Evolve in the same turn`);
 		}
 		if (terastallize && this.battle.gen !== 9) {
 			// Make this work properly
