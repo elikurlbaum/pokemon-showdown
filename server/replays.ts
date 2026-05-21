@@ -3,40 +3,40 @@
  *
  * Ported to TypeScript by Annika and Mia.
  */
-import { SQL, PGDatabase } from "../lib/database";
-import * as crypto from "crypto";
+import { SQL, PGDatabase } from '../lib/database';
+import * as crypto from 'crypto';
 
-export const replaysDB = Config.replaysdb
-	? new PGDatabase(Config.replaysdb)
-	: null!;
+export const replaysDB = Config.replaysdb ? new PGDatabase(Config.replaysdb) : null!;
 
-export const replays = replaysDB?.getTable<ReplayRow>("replays", "id");
+export const replays = replaysDB?.getTable<
+	ReplayRow
+>('replays', 'id');
 
 export const replayPlayers = replaysDB?.getTable<{
-	replay_id: string;
-	playerid: string;
-	formatid: string;
-	rating: number | null;
-	uploadtime: number;
-	private: ReplayRow["private"];
-	password: string | null;
-	format: string;
+	replay_id: string,
+	playerid: string,
+	formatid: string,
+	rating: number | null,
+	uploadtime: number,
+	private: ReplayRow['private'],
+	password: string | null,
+	format: string,
 	/** comma-delimited player names */
-	players: string;
-}>("replay_players");
+	players: string,
+}>('replay_players');
 
 // must be a type and not an interface to qualify as an SQLRow
 export type ReplayRow = {
-	id: string;
-	format: string;
+	id: string,
+	format: string,
 	/** player names delimited by `,`; starting with `!` denotes that player wants the replay private */
-	players: string;
-	log: string;
-	inputlog: string | null;
-	uploadtime: number;
-	views: number;
-	formatid: string;
-	rating: number | null;
+	players: string,
+	log: string,
+	inputlog: string | null,
+	uploadtime: number,
+	views: number,
+	formatid: string,
+	rating: number | null,
 	/**
 	 * 0 = public
 	 * 1 = private (with or without password)
@@ -44,35 +44,31 @@ export type ReplayRow = {
 	 * 3 = deleted
 	 * 10 = autosaved
 	 */
-	private: 0 | 1 | 2 | 3 | 10;
-	password: string | null;
+	private: 0 | 1 | 2 | 3 | 10,
+	password: string | null,
 };
-type Replay = Omit<ReplayRow, "formatid" | "players" | "password" | "views"> & {
-	players: string[];
-	views?: number;
-	password?: string | null;
+type Replay = Omit<ReplayRow, 'formatid' | 'players' | 'password' | 'views'> & {
+	players: string[],
+	views?: number,
+	password?: string | null,
 };
 
-export const Replays = new (class {
+export const Replays = new class {
 	db = replaysDB as unknown;
 	replaysTable = replays as unknown;
 	replayPlayersTable = replayPlayers as unknown;
-	readonly passwordCharacters = "0123456789abcdefghijklmnopqrstuvwxyz";
+	readonly passwordCharacters = '0123456789abcdefghijklmnopqrstuvwxyz';
 
 	toReplay(this: void, row: ReplayRow) {
 		const replay: Replay = {
 			...row,
-			players: row.players
-				.split(",")
-				.map((player) =>
-					player.startsWith("!") ? player.slice(1) : player,
-				),
+			players: row.players.split(',').map(player => player.startsWith('!') ? player.slice(1) : player),
 		};
 		if (!replay.password && replay.private === 1) replay.private = 2;
 		return replay;
 	}
 	toReplays(this: void, rows: ReplayRow[]) {
-		return rows.map((row) => Replays.toReplay(row));
+		return rows.map(row => Replays.toReplay(row));
 	}
 
 	toReplayRow(this: void, replay: Replay) {
@@ -81,7 +77,7 @@ export const Replays = new (class {
 			password: null,
 			views: 0,
 			...replay,
-			players: replay.players.join(","),
+			players: replay.players.join(','),
 			formatid,
 		};
 		if (replayData.private === 1 && !replayData.password) {
@@ -114,7 +110,7 @@ export const Replays = new (class {
 				});
 			}
 		} catch (e: any) {
-			if (e?.routine !== "NewUniquenessConstraintViolationError") throw e;
+			if (e?.routine !== 'NewUniquenessConstraintViolationError') throw e;
 			await replays.update(replay.id, {
 				log: replayData.log,
 				inputlog: replayData.inputlog,
@@ -128,10 +124,7 @@ export const Replays = new (class {
 				password: replayData.password,
 			})`WHERE replay_id = ${replay.id}`;
 		}
-		return (
-			replayData.id +
-			(replayData.password ? `-${replayData.password}pw` : "")
-		);
+		return replayData.id + (replayData.password ? `-${replayData.password}pw` : '');
 	}
 
 	async get(id: string): Promise<Replay | null> {
@@ -145,31 +138,21 @@ export const Replays = new (class {
 
 	async edit(replay: Replay) {
 		const replayData = this.toReplayRow(replay);
-		await replays.update(replay.id, {
-			private: replayData.private,
-			password: replayData.password,
-		});
+		await replays.update(replay.id, { private: replayData.private, password: replayData.password });
 	}
 
 	generatePassword(length = 31) {
-		let password = "";
+		let password = '';
 		for (let i = 0; i < length; i++) {
-			password +=
-				this.passwordCharacters[
-					crypto.randomInt(0, this.passwordCharacters.length - 1)
-				];
+			password += this.passwordCharacters[crypto.randomInt(0, this.passwordCharacters.length - 1)];
 		}
 
 		return password;
 	}
 
 	search(args: {
-		page?: number;
-		isPrivate?: boolean;
-		byRating?: boolean;
-		format?: string;
-		username?: string;
-		username2?: string;
+		page?: number, isPrivate?: boolean, byRating?: boolean,
+		format?: string, username?: string, username2?: string,
 	}): Promise<Replay[]> {
 		const page = args.page || 0;
 		if (page > 100) return Promise.resolve([]);
@@ -182,9 +165,7 @@ export const Replays = new (class {
 		const format = args.format ? toID(args.format) : null;
 
 		if (args.username) {
-			const order = args.byRating
-				? SQL`ORDER BY rating DESC`
-				: SQL`ORDER BY uploadtime DESC`;
+			const order = args.byRating ? SQL`ORDER BY rating DESC` : SQL`ORDER BY uploadtime DESC`;
 			const userid = toID(args.username);
 			if (args.username2) {
 				const userid2 = toID(args.username2);
@@ -221,30 +202,26 @@ export const Replays = new (class {
 		if (args.byRating) {
 			return replays.query()`SELECT uploadtime, id, format, players, rating, password 
 				FROM replays 
-				WHERE private = ${isPrivate} AND formatid = ${format} ORDER BY rating DESC LIMIT ${limit1}, 51`.then(
-				this.toReplays,
-			);
+				WHERE private = ${isPrivate} AND formatid = ${format} ORDER BY rating DESC LIMIT ${limit1}, 51`
+				.then(this.toReplays);
 		} else {
 			return replays.query()`SELECT uploadtime, id, format, players, rating, password 
 				FROM replays 
-				WHERE private = ${isPrivate} AND formatid = ${format} ORDER BY uploadtime DESC LIMIT ${limit1}, 51`.then(
-				this.toReplays,
-			);
+				WHERE private = ${isPrivate} AND formatid = ${format} ORDER BY uploadtime DESC LIMIT ${limit1}, 51`
+				.then(this.toReplays);
 		}
 	}
 
 	fullSearch(term: string, page = 0): Promise<Replay[]> {
 		if (page > 0) return Promise.resolve([]);
 
-		const patterns = term.split(",").map((subterm) => {
-			const escaped = subterm.replace(/%/g, "\\%").replace(/_/g, "\\_");
+		const patterns = term.split(',').map(subterm => {
+			const escaped = subterm.replace(/%/g, '\\%').replace(/_/g, '\\_');
 			return `%${escaped}%`;
 		});
-		if (patterns.length !== 1 && patterns.length !== 2)
-			return Promise.resolve([]);
+		if (patterns.length !== 1 && patterns.length !== 2) return Promise.resolve([]);
 
-		const secondPattern =
-			patterns.length >= 2 ? SQL`AND log LIKE ${patterns[1]} ` : undefined;
+		const secondPattern = patterns.length >= 2 ? SQL`AND log LIKE ${patterns[1]} ` : undefined;
 
 		return replays.query()`SELECT /*+ MAX_EXECUTION_TIME(10000) */ 
 			uploadtime, id, format, players, rating FROM ps_replays 
@@ -254,11 +231,9 @@ export const Replays = new (class {
 
 	recent() {
 		return replays.selectAll(
-			SQL`uploadtime, id, format, players, rating`,
-		)`WHERE private = 0 ORDER BY uploadtime DESC LIMIT 50`.then(
-			this.toReplays,
-		);
+			SQL`uploadtime, id, format, players, rating`
+		)`WHERE private = 0 ORDER BY uploadtime DESC LIMIT 50`.then(this.toReplays);
 	}
-})();
+};
 
 export default Replays;
