@@ -2083,7 +2083,7 @@ export class GameRoom extends BasicRoom {
 		if (Replays.db) {
 			const uploadtime = Date.now();
 			const timestamp = uploadtime;
-			const idWithServer = Config.serverid === 'showdown' ? `${id}-${timestamp}` : `${Config.serverid}-${id}-${timestamp}`;
+			const idWithServer = Config.serverid === 'showdown' ? `${id}-${timestamp}` : `${Config.serverid}-${timestamp}`;
 			try {
 				const fullid = await Replays.add({
 					id: idWithServer,
