@@ -1603,7 +1603,7 @@ export const Rulesets: import('../sim/dex-formats').FormatDataTable = {
 			this.add('rule', 'Terastal Clause: You cannot Terastallize');
 		},
 	},
-		onemegaorteraclause: {
+	onemegaorteraclause: {
 		effectType: 'Rule',
 		name: 'One Mega or Tera Clause',
 		desc: "Each team may use either one Mega Evolution <em>or</em> one Terastallization per battle, but not both.",
