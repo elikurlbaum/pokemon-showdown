@@ -2,7 +2,7 @@
 from pathlib import Path
 import re
 
-INPUT_FILE = Path("data/mods/champions/formats-data.ts")
+INPUT_FILE = Path("data/formats-data.backup.ts")
 OUTPUT_FILE = Path("data/mods/pdl/formats-data.ts")
 
 
