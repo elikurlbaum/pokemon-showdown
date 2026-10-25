@@ -2,13 +2,13 @@
 import re
 from pathlib import Path
 
-CHAMPIONS_FILE = Path("data/mods/champions/learnsets.ts")
-NATIONAL_FILE = Path("data/learnsets.ts")
+CHAMPIONS_FILE = Path("data/mods/champions/learnsets.backup.ts")
+NATIONAL_FILE = Path("data/learnsets.backup.ts")
 OUTPUT_FILE = Path("data/mods/pdl/learnsets.ts")
 
 
 def find_matching_brace(text, opening):
-    """Find the closing brace matching text[opening], ignoring strings/comments."""
+    """Find the matching closing brace, ignoring strings and comments."""
     depth = 0
     i = opening
     state = "normal"
@@ -51,18 +51,18 @@ def find_matching_brace(text, opening):
 
         i += 1
 
-    raise ValueError(f"No matching closing brace for position {opening}")
+    raise ValueError(f"No matching closing brace at position {opening}")
 
 
 def extract_object(text, opening):
     closing = find_matching_brace(text, opening)
-    return text[opening + 1:closing]
+    return text[opening + 1:closing], closing
 
 
 def parse_learnsets(path):
+    """Return Pokémon names and their original complete object blocks."""
     source = path.read_text(encoding="utf-8")
 
-    # Find the exported Learnsets object.
     declaration = re.search(r"\bLearnsets\s*:[^=]*=\s*\{", source)
     if not declaration:
         declaration = re.search(r"\bLearnsets\s*=\s*\{", source)
@@ -71,15 +71,14 @@ def parse_learnsets(path):
         raise ValueError(f"Could not find Learnsets object in {path}")
 
     opening = source.find("{", declaration.start())
-    body = extract_object(source, opening)
+    body, _ = extract_object(source, opening)
 
     pokemon = {}
     pos = 0
 
-    # Each Pokémon is a top-level property whose value is an object.
     while pos < len(body):
         match = re.search(
-            r"(?m)^\s{0,8}([a-zA-Z0-9_-]+)\s*:\s*\{",
+            r"(?m)^\s*([a-zA-Z0-9_-]+)\s*:\s*\{",
             body[pos:],
         )
         if not match:
@@ -87,27 +86,13 @@ def parse_learnsets(path):
 
         name = match.group(1)
         object_opening = pos + match.end() - 1
-        object_body = extract_object(body, object_opening)
+        object_body, object_closing = extract_object(body, object_opening)
 
-        learnset_match = re.search(r"\blearnset\s*:\s*\{", object_body)
-        if learnset_match:
-            learnset_opening = object_body.find("{", learnset_match.start())
-            learnset_body = extract_object(object_body, learnset_opening)
+        if re.search(r"\blearnset\s*:", object_body):
+            # Preserve the complete Pokémon object, including all original moves.
+            pokemon[name] = body[object_opening:object_closing + 1]
 
-            moves = {}
-            for line in learnset_body.splitlines():
-                move_match = re.match(
-                    r"^\s*([a-zA-Z0-9_-]+)\s*:\s*(.+?)\s*,?\s*$",
-                    line,
-                )
-                if move_match:
-                    move, value = move_match.groups()
-                    moves[move] = value.rstrip(",")
-
-            pokemon[name] = moves
-
-        # Skip the entire Pokémon object to avoid matching nested properties.
-        pos = object_opening + len(object_body) + 2
+        pos = object_closing + 1
 
     return pokemon
 
@@ -119,55 +104,52 @@ def main():
     print(f"Champions Pokémon parsed: {len(champions)}")
     print(f"National Dex Pokémon parsed: {len(national)}")
 
-    # Never write an empty or suspiciously incomplete result.
     if not champions or not national:
         raise RuntimeError("Parsing failed; output was NOT written.")
 
-    merged = {name: dict(moves) for name, moves in champions.items()}
+    # Start with Champions unchanged. Only add entirely missing Pokémon.
+    merged = dict(champions)
     added_pokemon = 0
-    added_moves = 0
 
-    for name, national_moves in national.items():
+    for name, block in national.items():
         if name not in merged:
-            merged[name] = dict(national_moves)
+            merged[name] = block
             added_pokemon += 1
-            continue
 
-        for move, value in national_moves.items():
-            if move not in merged[name]:
-                merged[name][move] = value
-                added_moves += 1
+    if len(merged) < len(champions):
+        raise RuntimeError("Merged count is too small; output was NOT written.")
 
-    # Build the complete TypeScript output.
+    if "archaludon" in champions:
+        if "bodypress:" in champions["archaludon"]:
+            print("Champions Archaludon already contains Body Press.")
+        else:
+            print("Champions Archaludon does not contain Body Press.")
+            if "bodypress:" in merged["archaludon"]:
+                print("Body Press was unexpectedly found in the preserved block.")
+
+    # Write the preserved Pokémon blocks without reconstructing their moves.
     lines = [
         "export const Learnsets: import('../../../sim/dex-species').ModdedLearnsetDataTable = {"
     ]
 
-    for name, moves in merged.items():
+    for name, block in merged.items():
+        # Normalize outer indentation while preserving the block's contents.
+        block_lines = block.splitlines()
         lines.append(f"    {name}: {{")
-        lines.append("        learnset: {")
 
-        for move, value in sorted(moves.items()):
-            lines.append(f"            {move}: {value},")
+        for line in block_lines[1:-1]:
+            lines.append("    " + line.strip() if line.strip() else "")
 
-        lines.extend(["        },", "    },"])
+        lines.append("    },")
 
     lines.extend(["};", ""])
 
-    output = "\n".join(lines)
-
-    # Sanity checks before writing.
-    if len(merged) < len(champions):
-        raise RuntimeError("Merged count is smaller than Champions count.")
-    if "venusaur" not in merged or not merged["venusaur"]:
-        raise RuntimeError("Expected Venusaur learnset missing; output not written.")
-
     OUTPUT_FILE.parent.mkdir(parents=True, exist_ok=True)
-    OUTPUT_FILE.write_text(output, encoding="utf-8")
+    OUTPUT_FILE.write_text("\n".join(lines), encoding="utf-8")
 
     print(f"\nMerged Pokémon: {len(merged)}")
     print(f"Added Pokémon from National Dex: {added_pokemon}")
-    print(f"Added missing moves: {added_moves}")
+    print("Existing Champions learnsets were not supplemented with National Dex moves.")
     print(f"Output written to: {OUTPUT_FILE}")
 
 
