@@ -1,4 +1,4 @@
-export const Learnsets: import('../../../sim/dex-species').ModdedLearnsetDataTable = {
+export const Learnsets: import('../sim/dex-species').ModdedLearnsetDataTable = {
 	venusaur: {
 		learnset: {
 			acidspray: ["9M"],
